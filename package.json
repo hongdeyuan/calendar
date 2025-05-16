@@ -1,6 +1,6 @@
 {
-  "name": "rc-calendar",
-  "version": "9.15.10",
+  "name": "rc-calendar-beta",
+  "version": "9.15.11",
   "description": "React Calendar",
   "keywords": [
     "react",
@@ -72,6 +72,7 @@
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "enzyme-to-json": "^3.3.1",
+    "graceful-fs": "^4.2.11",
     "jest": "^22.1.4",
     "mockdate": "^2.0.1",
     "pre-commit": "1.x",
@@ -97,5 +98,9 @@
     "rc-util": "^4.1.1",
     "react-lifecycles-compat": "^3.0.4"
   },
-  "types": "index.d.ts"
+  "types": "index.d.ts",
+  "resolutions": {
+    "graceful-fs": "^4.2.11",
+    "vinyl-fs/graceful-fs": "^4.2.11"
+  }
 }
