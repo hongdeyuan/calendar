@@ -225,8 +225,7 @@ export default class DateTBody extends React.Component {
           <td
             key={passed}
             onClick={disabled ? undefined : props.onSelect.bind(null, current)}
-            onMouseEnter={disabled ?
-              undefined : props.onDayHover && props.onDayHover.bind(null, current) || undefined}
+            onMouseEnter={props.onDayHover && props.onDayHover.bind(null, current) || undefined}
             role="gridcell"
             title={getTitleString(current)}
             className={cls}

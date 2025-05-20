@@ -26,6 +26,10 @@ class DateInput extends React.Component {
     selectedValue: PropTypes.object,
     clearIcon: PropTypes.node,
     inputMode: PropTypes.string,
+    hoverValue: PropTypes.any,
+    focused: PropTypes.bool,
+    onFocus: PropTypes.func,
+    onBlur: PropTypes.func,
   }
 
   constructor(props) {
@@ -107,6 +111,7 @@ class DateInput extends React.Component {
 
   onFocus = () => {
     this.setState({ hasFocus: true });
+    this.props.onFocus();
   }
 
   onBlur = () => {
@@ -114,6 +119,7 @@ class DateInput extends React.Component {
       hasFocus: false,
       str: formatDate(prevProps.value, prevProps.format),
     }));
+    this.props.onBlur();
   }
 
   onKeyDown = (event) => {
@@ -168,15 +174,23 @@ class DateInput extends React.Component {
   render() {
     const props = this.props;
     const { invalid, str } = this.state;
-    const { locale, prefixCls, placeholder, clearIcon, inputMode } = props;
+    const { locale, prefixCls, placeholder, clearIcon, inputMode, focused, hoverValue } = props;
     const invalidClass = invalid ? `${prefixCls}-input-invalid` : '';
+    const hoverStr = formatDate(hoverValue, this.props.format);
+    const isPrevFocused = focused && hoverValue;
     return (
       <div className={`${prefixCls}-input-wrap`}>
-        <div className={`${prefixCls}-date-input-wrap`}>
+        <div
+          className={`${prefixCls}-date-input-wrap${
+            focused ? ` ${prefixCls}-date-input-focused` : ''
+          }`}
+        >
           <input
             ref={this.saveDateInput}
-            className={`${prefixCls}-input ${invalidClass}`}
-            value={str}
+            className={`${prefixCls}-input ${invalidClass}${
+              isPrevFocused ? ` ${prefixCls}-date-input-prev` : ''
+            }`}
+            value={isPrevFocused ? hoverStr : str || hoverStr}
             disabled={props.disabled}
             placeholder={placeholder}
             onChange={this.onInputChange}

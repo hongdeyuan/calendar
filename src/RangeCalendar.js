@@ -78,6 +78,16 @@ function onInputSelect(direction, value, cause) {
   this.fireSelectValueChange(selectedValue, null, cause || { source: 'dateInput' });
 }
 
+function getFocusedTriggerSource(value) {
+  if (!value.length) {
+    return 'start';
+  }
+  if (value.length === 1) {
+    return 'end';
+  }
+  return 'start';
+}
+
 class RangeCalendar extends React.Component {
   static propTypes = {
     ...propType,
@@ -138,6 +148,7 @@ class RangeCalendar extends React.Component {
       showTimePicker: false,
       mode: props.mode || ['date', 'date'],
       panelTriggerSource: '', // Trigger by which picker panel: 'start' & 'end'
+      focusedTriggerSource: getFocusedTriggerSource(value), // 'start' & 'end'
     };
   }
 
@@ -183,6 +194,11 @@ class RangeCalendar extends React.Component {
         syncTime(prevSelectedValue[0], value);
         nextSelectedValue = [value];
       }
+    }
+
+    if (!prevSelectedValue.length && nextSelectedValue.length === 1) {
+      // 如果只选择了 1 个值，则将 focusedTriggerSource 设置为 'end'
+      this.setState({ focusedTriggerSource: 'end' });
     }
 
     this.fireSelectValueChange(nextSelectedValue);
@@ -422,6 +438,22 @@ class RangeCalendar extends React.Component {
     props.onPanelChange(newValue, newMode);
   }
 
+  onStartFocus = () => {
+    this.setState({ focusedTriggerSource: 'start' });
+  }
+
+  onStartBlur = () => {
+    // this.setState({ focusedTriggerSource: '' });
+  }
+
+  onEndFocus = () => {
+    this.setState({ focusedTriggerSource: 'end' });
+  }
+
+  onEndBlur = () => {
+    // this.setState({ focusedTriggerSource: '' });
+  }
+
   static getDerivedStateFromProps(nextProps, state) {
     const newState = {};
     if ('value' in nextProps) {
@@ -580,6 +612,7 @@ class RangeCalendar extends React.Component {
     }
 
     if (selectedValue[0] && !selectedValue[1]) {
+      this.setState({ selectedValue });
       this.setState({ firstSelectedValue: selectedValue[0] });
       this.fireHoverValueChange(selectedValue.concat());
     }
@@ -615,6 +648,8 @@ class RangeCalendar extends React.Component {
   clear = () => {
     this.fireSelectValueChange([], true);
     this.props.onClear();
+    // 清除后，将 focusedTriggerSource 设置为 'start'
+    this.setState({ focusedTriggerSource: 'start' });
   }
 
   disabledStartTime = (time) => {
@@ -647,6 +682,7 @@ class RangeCalendar extends React.Component {
       selectedValue,
       mode,
       showTimePicker,
+      focusedTriggerSource,
     } = state;
     const className = {
       [props.className]: !!props.className,
@@ -660,9 +696,7 @@ class RangeCalendar extends React.Component {
     const newProps = {
       selectedValue: state.selectedValue,
       onSelect: this.onSelect,
-      onDayHover: type === 'start' && selectedValue[1] ||
-        type === 'end' && selectedValue[0] || !!hoverValue.length ?
-        this.onDayHover : undefined,
+      onDayHover: this.onDayHover,
     };
 
     let placeholder1;
@@ -740,6 +774,9 @@ class RangeCalendar extends React.Component {
               enablePrev
               enableNext={!isClosestMonths || this.isMonthYearPanelShow(mode[1])}
               clearIcon={clearIcon}
+              focused={focusedTriggerSource === 'start'}
+              onFocus={this.onStartFocus}
+              onBlur={this.onStartBlur}
             />
             <span className={`${prefixCls}-range-middle`}>{seperator}</span>
             <CalendarPart
@@ -764,6 +801,9 @@ class RangeCalendar extends React.Component {
               enablePrev={!isClosestMonths || this.isMonthYearPanelShow(mode[0])}
               enableNext
               clearIcon={clearIcon}
+              focused={focusedTriggerSource === 'end'}
+              onFocus={this.onEndFocus}
+              onBlur={this.onEndBlur}
             />
           </div>
           <div className={cls}>
@@ -785,14 +825,15 @@ class RangeCalendar extends React.Component {
                     showTimePicker={showTimePicker || (mode[0] === 'time' && mode[1] === 'time')}
                     onOpenTimePicker={this.onOpenTimePicker}
                     onCloseTimePicker={this.onCloseTimePicker}
-                    timePickerDisabled={!this.hasSelectedValue() || hoverValue.length}
+                    timePickerDisabled={false}
+                    // timePickerDisabled={!this.hasSelectedValue() || hoverValue.length}
                   /> : null}
                 {showOkButton ?
                   <OkButton
                     {...props}
                     onOk={this.onOk}
                     okDisabled={!this.isAllowedDateAndTime(selectedValue) ||
-                      !this.hasSelectedValue() || hoverValue.length
+                      !this.hasSelectedValue()
                     }
                   /> : null}
               </div>
