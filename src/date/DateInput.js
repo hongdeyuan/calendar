@@ -111,7 +111,9 @@ class DateInput extends React.Component {
 
   onFocus = () => {
     this.setState({ hasFocus: true });
-    this.props.onFocus();
+    if (typeof this.props.onFocus === 'function') {
+      this.props.onFocus();
+    }
   }
 
   onBlur = () => {
@@ -119,7 +121,9 @@ class DateInput extends React.Component {
       hasFocus: false,
       str: formatDate(prevProps.value, prevProps.format),
     }));
-    this.props.onBlur();
+    if (typeof this.props.onBlur === 'function') {
+      this.props.onBlur();
+    }
   }
 
   onKeyDown = (event) => {
